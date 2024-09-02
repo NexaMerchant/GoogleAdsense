@@ -3,6 +3,7 @@
     "license": "MIT",
     "type": "library",
     "description" : "GoogleAdsense Apps",
+    "keywords": ["googleadsense", "google", "adsense", "nexamerchant"],
     "authors": [
         {
             "name": "Steve",
