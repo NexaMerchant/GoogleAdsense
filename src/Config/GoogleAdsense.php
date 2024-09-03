@@ -85,4 +85,36 @@ return [
         'email' => 'email@example.com',
         'issues' => 'https://github.com/xxl4'
     ],
+
+    /**
+     * 
+     * Auth Config for google adsense
+     * 
+     */
+    'AuthConfig' => storage_path('app/googleadsense.json'),
+
+    /**
+     * 
+     * Access Type for google adsense
+     *
+     */
+    'AccessType' => 'offline',
+
+    /**
+     * 
+     * Scopes for google adsense
+     *
+     */
+    'Scopes' => [
+        'https://www.googleapis.com/auth/adsense.readonly',
+        'https://www.googleapis.com/auth/adsense'
+    ],
+
+    /**
+     * 
+     * Redirect URI for google adsense
+     *
+     */
+
+    'RedirectUri' => 'http://localhost:8000/googleadsense/callback',
 ];
