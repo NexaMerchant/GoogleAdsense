@@ -33,9 +33,16 @@ class GoogleAdsenseController extends Controller {
         $this->client->setApprovalPrompt('force');
         //$this->client->setAuthConfig(storage_path('app/client_secret_33839582772-7bqi2gto92jms75ujbhvfo22je2haold.apps.googleusercontent.com.json'));
         $this->client->setAuthConfig(config('GoogleAdsense.auth_config_file'));
+        
+        // random string
+        $random = request()->session()->get('googleadsense_uid');
+        if(!$random) {
+            $random = substr(md5(uniqid()),0,10);
+            // save it to session
+            request()->session()->put('googleadsense_uid',$random);
+        }
 
-        $this->client->setRedirectUri(route('googleadsense.web.googleadsense.callback'));
-
+        $this->client->setRedirectUri(route('googleadsense.web.googleadsense.callback',['uid' => $random]));
         $token = unserialize(file_get_contents(storage_path('app/tokens.dat')));
 
         $this->client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
