@@ -47,6 +47,11 @@ class GoogleAdsenseServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../Resources/views' => $this->app->resourcePath('themes/default/views'),
             ], 'GoogleAdsense');
+
+            // Publish config files
+            $this->publishes([
+                dirname(__DIR__) . '/Config/GoogleAdsense.php' => config_path('GoogleAdsense.php')
+            ], 'GoogleAdsense');
         }
 
     }
