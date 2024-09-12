@@ -9,7 +9,7 @@
  */
 use Illuminate\Support\Facades\Route;
 use NexaMerchant\GoogleAdsense\Http\Controllers\Admin\ExampleController;
-use NexaMerchant\GoogleAdsense\Http\Controllers\Admin\GoogleAdsenseController;
+use NexaMerchant\GoogleAdsense\Http\Controllers\Api\GoogleAdsenseController;
 
 Route::group(['middleware' => ['admin','admin_option_log'], 'prefix' => config('app.admin_url')], function () {
     Route::prefix('googleadsense')->group(function () {
