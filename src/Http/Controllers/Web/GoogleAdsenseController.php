@@ -3,6 +3,10 @@ namespace NexaMerchant\GoogleAdsense\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 
+use Google_Client;
+use Google_Service_Adsense;
+use stdClass;
+
 class GoogleAdsenseController extends Controller
 {
 
