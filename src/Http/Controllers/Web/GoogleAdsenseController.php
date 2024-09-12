@@ -14,11 +14,12 @@ class GoogleAdsenseController extends Controller
     public function __construct()
     {
         $this->client = new Google_Client();
-        $this->client->addScope('https://www.googleapis.com/auth/adsense.readonly');
-        $this->client->addScope('https://www.googleapis.com/auth/adsense');
+        // $this->client->addScope('https://www.googleapis.com/auth/adsense.readonly');
+        // $this->client->addScope('https://www.googleapis.com/auth/adsense');
+        $this->client->addScope(config('GoogleAdsense.Scopes'));
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
-        $this->client->setAuthConfig(storage_path('app/client_secret_33839582772-7bqi2gto92jms75ujbhvfo22je2haold.apps.googleusercontent.com.json'));
+        $this->client->setAuthConfig(config('GoogleAdsense.auth_config_file'));
     }
 
     public function index()

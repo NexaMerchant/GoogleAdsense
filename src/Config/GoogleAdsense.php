@@ -117,4 +117,11 @@ return [
      */
 
     'RedirectUri' => 'http://localhost:8000/googleadsense/callback',
+
+    /**
+     * 
+     * Google Adsense Auth Config File
+     * 
+     */
+    'auth_config_file' => storage_path('app/client_secret_33839582772-7bqi2gto92jms75ujbhvfo22je2haold.apps.googleusercontent.com.json'),
 ];
