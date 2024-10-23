@@ -2,7 +2,7 @@
     "name": "nexa-merchant/googleadsense",
     "license": "MIT",
     "type": "library",
-    "description" : "GoogleAdsense Apps",
+    "description" : "GoogleAdsense Apps for NexaMerchant, Use this package to integrate Google Adsense into your application, Use Api to get data from Google Adsense",
     "keywords": ["googleadsense", "google", "adsense", "nexamerchant"],
     "suggest": {
         "laravel/framework": "Laravel Framework",
