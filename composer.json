@@ -10,6 +10,9 @@
         "phpunit/phpcov": "PHPUnit Code Coverage",
         "phpunit/phpunit": "PHPUnit"
     },
+    "provide": {
+        "nexa-merchant/googleadsense": "1.0.0"
+    },
     "authors": [
         {
             "name": "Steve",
