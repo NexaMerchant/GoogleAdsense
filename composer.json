@@ -4,6 +4,12 @@
     "type": "library",
     "description" : "GoogleAdsense Apps",
     "keywords": ["googleadsense", "google", "adsense", "nexamerchant"],
+    "suggest": {
+        "laravel/framework": "Laravel Framework",
+        "google/apiclient": "Google API Client",
+        "phpunit/phpcov": "PHPUnit Code Coverage",
+        "phpunit/phpunit": "PHPUnit"
+    },
     "authors": [
         {
             "name": "Steve",
