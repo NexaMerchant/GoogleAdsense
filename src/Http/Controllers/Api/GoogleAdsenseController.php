@@ -18,6 +18,138 @@ class GoogleAdsenseController extends Controller {
     private $client;
     private $service;
 
+    private $metrics = [
+        'ESTIMATED_EARNINGS',
+        'COST_PER_CLICK',
+        'PAGE_VIEWS_RPM',
+        'PAGE_VIEWS',
+        'IMPRESSIONS',
+        'IMPRESSIONS_RPM',
+        'ACTIVE_VIEW_VIEWABILITY',
+        'CLICKS',
+        'METRIC_UNSPECIFIED',
+        'AD_REQUESTS',
+        'MATCHED_AD_REQUESTS',
+        'TOTAL_IMPRESSIONS',
+        'INDIVIDUAL_AD_IMPRESSIONS',
+        'PAGE_VIEWS_SPAM_RATIO',
+        'AD_REQUESTS_SPAM_RATIO',
+        'MATCHED_AD_REQUESTS_SPAM_RATIO',
+        'IMPRESSIONS_SPAM_RATIO',
+        'INDIVIDUAL_AD_IMPRESSIONS_SPAM_RATIO',
+        'CLICKS_SPAM_RATIO',
+        'AD_REQUESTS_COVERAGE',
+        'PAGE_VIEWS_CTR',
+        'AD_REQUESTS_CTR',
+        'MATCHED_AD_REQUESTS_CTR',
+        'IMPRESSIONS_CTR',
+        'INDIVIDUAL_AD_IMPRESSIONS_CTR',
+        'ACTIVE_VIEW_MEASURABILITY',
+        'ACTIVE_VIEW_TIME',
+        'AD_REQUESTS_RPM',
+        'MATCHED_AD_REQUESTS_RPM',
+        'INDIVIDUAL_AD_IMPRESSIONS_RPM',
+        'ADS_PER_IMPRESSION',
+        'TOTAL_EARNINGS',
+        'FUNNEL_REQUESTS',
+        'FUNNEL_IMPRESSIONS',
+        'FUNNEL_CLICKS',
+        'FUNNEL_RPM',
+    ];
+
+    private $recommendMetrics = [
+        'ESTIMATED_EARNINGS',
+        'PAGE_VIEWS',
+        'PAGE_RPM',
+        'IMPRESSIONS',
+        'IMPRESSIONS_RPM',
+        'ACTIVE_VIEW_VIEWABILITY',
+        'CTR',
+        'AVERAGE_VIEWABLE_TIME',
+        'ACTIVE_VIEW_MEASURABILITY',   
+    ];
+
+    private $advencedMetrics = [
+        'TOTAL_IMPRESSIONS',
+        'CLICKS',
+        'CPC',
+        'PAGE_CTR',
+        'AD_REQUESTS',
+        'AD_REQUESTS_RPM',
+        'COVERAGE',
+        'MATCHED_AD_REQUESTS',
+        'AD_PER_IMPRESSION',
+        'AD_CTR',
+        'AD_IMPRESSIONS',
+        'AD_RPM',
+        'FUNNEL_REQUESTS',
+        'FUNNEL_IMPRESSIONS',
+        'FUNNEL_CLICKS',
+        'FUNNEL_RPM',
+    ];
+
+    private $sessionMetrics = [
+        'PAGE_VIEWS_PER_AD_SESSION',
+        'IMPRESSIONS_PER_AD_SESSION',
+        'AD_SESSION_DURATION',
+        'AD_SESSIONS',
+        'AD_SESSIONS_MEASURABLE',
+        'AD_SESSION_RPM',
+    ];
+
+    private $orderBy = [
+        'ASC',
+        'DESC',
+    ];
+
+    private $dateRange = [
+        'TODAY',
+        'YESTERDAY',
+        'LAST_7_DAYS',
+        'LAST_30_DAYS',
+        'THIS_MONTH',
+        'LAST_MONTH',
+        'MONTH_TO_DATE',
+        'YEAR_TO_DATE',
+    ];
+
+    private $dimensions = [
+        'DATE',
+        'WEEK',
+        'MONTH',
+        'YEAR',
+        'AD_UNIT',
+        'AD_UNIT_SIZE_NAME',
+        'AD_UNIT_NAME',
+        'PRODUCT_NAME',
+        'PRODUCT_CODE',
+        'CUSTOM_CHANNEL_NAME',
+        'CUSTOM_CHANNEL_CODE',
+        'URL_CHANNEL_NAME',
+        'URL_CHANNEL_CODE',
+        'COUNTRY_NAME',
+        'COUNTRY_CODE',
+        'PLATFORM_TYPE_NAME',
+        'PLATFORM_TYPE_CODE',
+        'BUYER_NETWORK_NAME',
+        'BUYER_NETWORK_CODE',
+        'TARGETING_TYPE_NAME',
+        'TARGETING_TYPE_CODE',
+        'REQUESTED_AD_TYPE_NAME',
+        'REQUESTED_AD_TYPE_CODE',
+        'AD_CLIENT_NAME',
+        'AD_CLIENT_CODE',
+        'AD_UNIT_ID',
+        'CUSTOM_CHANNEL_ID',
+        'URL_CHANNEL_ID',
+        'COUNTRY_CRITERIA_ID',
+        'PLATFORM_TYPE_ID',
+        'BUYER_NETWORK_ID',
+        'TARGETING_TYPE_ID',
+        'REQUESTED_AD_TYPE_ID',
+        'AD_CLIENT_ID',
+    ];
+
     public function __construct()
     {
         //$this->middleware('auth:api');
@@ -26,23 +158,13 @@ class GoogleAdsenseController extends Controller {
         //$this->middleware('permission:report-google-adsense', ['only' => ['googleAdsense']]);
 
         $this->client = new Google_Client();
-        // $this->client->addScope('https://www.googleapis.com/auth/adsense.readonly');
-        // $this->client->addScope('https://www.googleapis.com/auth/adsense');
-        $this->client->addScope(config('GoogleAdsense.Scopes'));
+        $this->client->addScope('https://www.googleapis.com/auth/adsense.readonly');
         $this->client->setAccessType('offline');
         $this->client->setApprovalPrompt('force');
-        //$this->client->setAuthConfig(storage_path('app/client_secret_33839582772-7bqi2gto92jms75ujbhvfo22je2haold.apps.googleusercontent.com.json'));
-        $this->client->setAuthConfig(config('GoogleAdsense.auth_config_file'));
-        
-        // random string
-        $random = request()->session()->get('googleadsense_uid');
-        if(!$random) {
-            $random = substr(md5(uniqid()),0,10);
-            // save it to session
-            request()->session()->put('googleadsense_uid',$random);
-        }
+        $this->client->setAuthConfig(storage_path('app/client_secret_33839582772-7bqi2gto92jms75ujbhvfo22je2haold.apps.googleusercontent.com.json'));
 
-        $this->client->setRedirectUri(route('googleadsense.web.googleadsense.callback',['uid' => $random]));
+        $this->client->setRedirectUri('https://adsapi.heomai.com/adsense-sample.php');
+
         $token = unserialize(file_get_contents(storage_path('app/tokens.dat')));
 
         $this->client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
@@ -190,6 +312,186 @@ class GoogleAdsenseController extends Controller {
 
     /**
      * 
+     * 
+     * 
+     */
+    public function getFilter(Request $request) {
+        $filter = $request->input('id');
+
+        switch ($filter) {
+            case '1': // Ad sizes
+                $recommendMetrics = $this->recommendMetrics;
+                $recommendSelected = ['ESTIMATED_EARNINGS','PAGE_VIEWS','PAGE_RPM','IMPRESSIONS','IMPRESSIONS_RPM','ACTIVE_VIEW_VIEWABILITY'];
+                $recommendDisabled = [];
+
+                $advencedMetrics = $this->advencedMetrics;
+                $advencedSelected = ['CLICKS'];
+                $advencedDisabled = [];
+
+                $sessionMetrics = $this->sessionMetrics;
+                $sessionSelected = [];
+                $sessionDisabled = [];
+                break;
+            case '2': // Entire account by day
+                $recommendMetrics = $this->recommendMetrics;
+                $recommendSelected = ['ESTIMATED_EARNINGS','PAGE_VIEWS','PAGE_RPM','IMPRESSIONS','IMPRESSIONS_RPM','ACTIVE_VIEW_VIEWABILITY'];
+                $recommendDisabled = [];
+
+                $advencedMetrics = $this->advencedMetrics;
+                $advencedSelected = ['CLICKS'];
+                $advencedDisabled = [];
+
+                $sessionMetrics = $this->sessionMetrics;
+                $sessionSelected = [];
+                $sessionDisabled = [];
+                break;
+            case '3': // Sites
+                $recommendMetrics = $this->recommendMetrics;
+                $recommendSelected = ['ESTIMATED_EARNINGS','PAGE_VIEWS','PAGE_RPM','IMPRESSIONS','IMPRESSIONS_RPM','ACTIVE_VIEW_VIEWABILITY'];
+                $recommendDisabled = [];
+
+                $advencedMetrics = $this->advencedMetrics;
+                $advencedSelected = ['CLICKS'];
+                $advencedDisabled = [];
+
+                $sessionMetrics = $this->sessionMetrics;
+                $sessionSelected = [];
+                $sessionDisabled = [];
+                break;
+            case '4': // Ad units
+                $recommendMetrics = $this->recommendMetrics;
+                $recommendSelected = ['ESTIMATED_EARNINGS','IMPRESSIONS','IMPRESSIONS_RPM','ACTIVE_VIEW_VIEWABILITY'];
+                $recommendDisabled = ['PAGE_VIEWS','PAGE_RPM'];
+
+                $advencedMetrics = $this->advencedMetrics;
+                $advencedSelected = ['CLICKS'];
+                $advencedDisabled = ['PAGE_CTR','FUNNEL_REQUESTS','FUNNEL_IMPRESSIONS','FUNNEL_CLICKS','FUNNEL_RPM'];
+
+                $sessionMetrics = $this->sessionMetrics;
+                $sessionSelected = [];
+                $sessionDisabled = ['PAGE_VIEWS_PER_AD_SESSION','IMPRESSIONS_PER_AD_SESSION','AD_SESSION_DURATION','AD_SESSIONS','AD_SESSIONS_MEASURABLE','AD_SESSION_RPM'];
+                break;
+            case '5': // Content Platforms
+                $recommendMetrics = $this->recommendMetrics;
+                $recommendSelected = ['ESTIMATED_EARNINGS','IMPRESSIONS','IMPRESSIONS_RPM','ACTIVE_VIEW_VIEWABILITY'];
+                $recommendDisabled = ['PAGE_VIEWS','PAGE_RPM'];
+
+                $advencedMetrics = $this->advencedMetrics;
+                $advencedSelected = ['CLICKS'];
+                $advencedDisabled = ['PAGE_CTR','FUNNEL_REQUESTS','FUNNEL_IMPRESSIONS','FUNNEL_CLICKS','FUNNEL_RPM'];
+
+                $sessionMetrics = $this->sessionMetrics;
+                $sessionSelected = [];
+                $sessionDisabled = ['PAGE_VIEWS_PER_AD_SESSION','IMPRESSIONS_PER_AD_SESSION','AD_SESSION_DURATION','AD_SESSIONS','AD_SESSIONS_MEASURABLE','AD_SESSION_RPM'];
+                break;
+            case '6': // Top pages
+                break;
+            case '7': // Countries
+                break;
+            case '8': // Products
+                break;
+            case '9': // Platforms
+                break;
+            case '10': // Entire account by week
+                break;
+            case '11': // Entire account by month
+                break;
+            case '12': // Custom Channels
+                break;
+            case '13': // URL Channels
+                break;
+            case '14': // Verified sites
+                break;
+            case '15': // Served creatives
+                break;
+            case '16': // Ad formats
+                break;
+            case '17': // Creative sizes
+                break;
+            case '18': // Targeting types
+                break;
+            case '19': // Bid types
+                break;
+            case '20': // Buyer networks
+                break;
+
+            
+            
+            default:
+                $recommendMetrics = $this->recommendMetrics;
+                $recommendSelected = [];
+                $recommendDisabled = [];
+
+                $advencedMetrics = $this->advencedMetrics;
+                $advencedSelected = [];
+                $advencedDisabled = [];
+
+                $sessionMetrics = $this->sessionMetrics;
+                $sessionSelected = [];
+                $sessionDisabled = [];
+                break;
+        }
+        
+        $result = [];
+        $recommend = [];
+
+        //base use recommendMetrics generate the recommend array
+        foreach($this->recommendMetrics as $metric) {
+            if(in_array($metric,$recommendSelected)) {
+                $recommend[$metric] = "selected";
+                continue;
+            }
+            if(in_array($metric,$recommendDisabled)) {
+                $recommend[$metric] = "disabled";
+                continue;
+            }
+            $recommend[$metric] = "";
+        }
+
+        $result['recommend'] = $recommend;
+        $advenced = [];
+       // $advenced['TOTAL_IMPRESSIONS'] = "disabled";
+
+        //base use advencedMetrics generate the advenced array
+        foreach($this->advencedMetrics as $metric) {
+            if(in_array($metric,$advencedSelected)) {
+                $advenced[$metric] = "selected";
+                continue;
+            }
+            if(in_array($metric,$advencedDisabled)) {
+                $advenced[$metric] = "disabled";
+                continue;
+            }
+            $advenced[$metric] = "";
+        }
+
+
+
+        $result['advenced'] = $advenced;
+        $session = [];
+        //$session['PAGE_VIEWS'] = "disabled";
+
+        //base use sessionMetrics generate the session array
+        foreach($this->sessionMetrics as $metric) {
+            if(in_array($metric,$sessionSelected)) {
+                $session[$metric] = "selected";
+                continue;
+            }
+            if(in_array($metric,$sessionDisabled)) {
+                $session[$metric] = "disabled";
+                continue;
+            }
+            $session[$metric] = "";
+        }
+
+        $result['session'] = $session;
+        
+
+        return $this->success("success",$result);
+    }
+
+    /**
+     * 
      * @link https://developers.google.com/adsense/management/reference/rest/v2/accounts.reports/generate
      * 
      */
@@ -220,7 +522,7 @@ class GoogleAdsenseController extends Controller {
         $optParams['currencyCode'] = $currencyCode;
         $optParams['languageCode'] = $languageCode;
         $optParams['reportingTimeZone'] = $reportingTimeZone;
-        $optParams['limit'] = $limit;
+        //$optParams['limit'] = $limit;
 
         //var_dump($request->all());exit;
 
@@ -324,7 +626,7 @@ class GoogleAdsenseController extends Controller {
             'metrics' => $metrics,
             'dimensions' => $dimensions,
             'orderBy' => $orderBy,
-            'limit' => $limit,
+           // 'limit' => $limit,
             'filters' => $filters,
             'currencyCode' => $currencyCode,
             'languageCode' => $languageCode,
